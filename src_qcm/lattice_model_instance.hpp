@@ -49,15 +49,15 @@ struct lattice_model_instance{
 	double monopole(vector3D<double>& k, double a, int nk, int orb, bool rec);
 	double potential_energy();
 	void reset_hybrid_dependent();
-	double Potthoff_functional();
+	virtual double Potthoff_functional();
 	double spectral_average(const string& name, const complex<double> w);
-	Green_function cluster_Green_function(Complex w, bool sig, bool spin_down);
+	virtual Green_function cluster_Green_function(Complex w, bool sig, bool spin_down);
 	lattice_model_instance(shared_ptr<lattice_model> _model, int label);
-	~lattice_model_instance();
+	virtual ~lattice_model_instance();
 	matrix<complex<double>> cluster_Green_function_remix(size_t i, complex<double> w, bool spin_down, bool blocks);
 	matrix<complex<double>> cluster_Green_function(size_t i, complex<double> w, bool spin_down, bool blocks);
 	matrix<complex<double>> cluster_hopping_matrix(size_t i, bool spin_down);
-	matrix<complex<double>> cluster_self_energy_remix(size_t i, complex<double> w, bool spin_down);
+	virtual matrix<complex<double>> cluster_self_energy_remix(size_t i, complex<double> w, bool spin_down);
 	matrix<complex<double>> cluster_self_energy(size_t i, complex<double> w, bool spin_down);
 	matrix<complex<double>> hybridization_function_remix(size_t i, complex<double> w, bool spin_down);
 	matrix<complex<double>> hybridization_function(size_t i, complex<double> w, bool spin_down);
@@ -92,7 +92,7 @@ struct lattice_model_instance{
 	void cluster_self_energy(Green_function& G);
 	void Green_eigensystem(Green_function &G, const vector3D<double> &k, vector<double> &e, matrix<Complex> &U, int opt, bool band_basis=false);
 	void Green_function_solve(); //!< calls the Green_function solver for all clusters
-	void inverse_Gcpt(const block_matrix<Complex> &Ginv, Green_function_k &M);
+	virtual void inverse_Gcpt(const block_matrix<Complex> &Ginv, Green_function_k &M);
 	void periodized_Green_function(Green_function_k &M);
 	void potential_energy_integrand(Complex w, vector3D<double> &k, const int *nv, double *I);
 	//! per-k potential-energy integrand, given a precomputed cluster Green function (with self-energy) and optionally its spin-down counterpart for up_down mixing
@@ -102,7 +102,9 @@ struct lattice_model_instance{
 	//! per-k SEF integrand, given a precomputed cluster Green function (and optionally its spin-down counterpart for up_down mixing)
 	void SEF_integrand_k(Green_function &G_up, Green_function *G_down, vector3D<double> &k, const int *nv, double *I);
 	void self_energy(Green_function_k& M);
-	void set_Gcpt(Green_function_k &M);
+	virtual void set_Gcpt(Green_function_k &M);
+	//! lattice Green function in the gauge of the cluster quantities, for the k-averages with them (the same as set_Gcpt() except in DCA)
+	virtual void set_Gcpt_cluster(Green_function_k &M){set_Gcpt(M);}
 	void set_V(Green_function_k &M, bool nohybrid=false);
 };
 

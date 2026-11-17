@@ -460,9 +460,7 @@ class CDMFT:
             )
 
         # Here we have converged
-        self.I = pyqcm.model_instance(
-            self.model
-        )  # a last instance with the converged parameters
+        self.I = self.new_instance()  # a last instance with the converged parameters
 
         # check consistency
         self.I.GS_consistency(self.check_ground_state)
@@ -500,7 +498,7 @@ class CDMFT:
         """
 
         self.model.set_parameter(self.varia, self.x)
-        self.I = pyqcm.model_instance(self.model)
+        self.I = self.new_instance()
         self.grid.udpate(self.I)
 
         # solve the impurity problem
@@ -639,6 +637,11 @@ class CDMFT:
         self.iter += 1
 
         return
+
+    # -----------------------------------------------------------------------------------------------
+    def new_instance(self):
+        """a model instance at the current parameters (the DCA subclass makes DCA instances)"""
+        return pyqcm.model_instance(self.model)
 
     # -----------------------------------------------------------------------------------------------
     def check_convergence(self):
@@ -829,6 +832,39 @@ class CDMFT:
             plt.plot(range(self.niter), self.var_data[i, 0:niter], "o-", ms=3, lw=0.5)
             plt.title(self.varia[i])
         plt.savefig("iterations.pdf")
+
+
+####################################################################################################
+class DCA(CDMFT):
+    """
+    Dynamical cluster approximation: the CDMFT loop on DCA instances, whose lattice Green function is diagonal in
+    the cluster momenta K and built from the dispersion of each K patch. Same arguments as CDMFT, plus:
+
+    :param list K: sub-baths: for each system of the cluster, in order, the cluster momenta whose self-energy it carries,
+        in units of pi, e.g. ``[[(0, 0), (1, 1)], [(0, 1), (1, 0)]]``. A K carried by several systems gets their
+        average. If None: a single system carries every K; several systems each carry the K their bath couples to.
+
+    One cluster, one band. Instances for later use with the same physics: ``pyqcm.model_instance(model, dca=True)``.
+    """
+
+    def __init__(self, model, *args, K=None, **kwargs):
+        self.channels = []  # for each system, the indices of the cluster momenta in K
+        if K is not None:
+            I = pyqcm.model_instance(model, dca=True)  # kept alive while its momenta are read
+            Kc = np.asarray(qcm.DCA_momenta(I.label))  # units of 2 pi
+            same = lambda a, k: np.allclose((Kc[a, : len(k)] - k + 0.5) % 1 - 0.5, 0)
+            for Ks in K:
+                idx = [a for k in Ks for a in range(len(Kc)) if same(a, np.asarray(k, dtype=float) / 2)]
+                if len(idx) != len(Ks):
+                    raise ValueError(f"DCA: {Ks} are not all cluster momenta (units of pi)")
+                self.channels.append(idx)
+        super().__init__(model, *args, **kwargs)  # runs the loop
+
+    def new_instance(self):
+        I = pyqcm.model_instance(self.model, dca=True)
+        for s, idx in enumerate(self.channels):
+            qcm.set_DCA_channels(s, idx, I.label)
+        return I
 
 
 ####################################################################################################

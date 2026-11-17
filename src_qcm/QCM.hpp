@@ -31,6 +31,8 @@ struct System;
 /**
  Interface per se
  */
+struct DCA_instance; // DCA.hpp
+
 namespace QCM{
   //! Throws if no model instance with this label exists.
   void check_instance(int label);
@@ -170,7 +172,9 @@ namespace QCM{
   //! Initiates the lattice model.
   void new_lattice_model(const string &name, vector<int64_t> &superlattice, vector<int64_t> &lattice, const string &latt_hybrid="");
   //! Creates a new instance of the lattice model with values associated to terms of the Hamiltonian.
-  void new_model_instance(int label);
+  void new_model_instance(int label, bool dca=false);
+  //! the DCA instance with that label (throws if it is not one)
+  DCA_instance& DCA_instance_at(int label);
   //! Prints a description of the model into a file (optionally with Asymptote markup).
   void print_model(const string& filename, bool asy_operators=false, bool asy_labels=false, bool asy_orb=false, bool asy_neighbors=false, bool asy_working_basis=false);
   //! Initializes the qcm library.

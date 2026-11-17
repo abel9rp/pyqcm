@@ -366,7 +366,7 @@ matrix<Complex> lattice_model_instance::projected_Green_function(Complex w, bool
 		case 0:
 			{
 				Green_function_k M(G,{0.0,0.0,0.0});
-				set_Gcpt(M);
+				set_Gcpt_cluster(M);
 				PGF += M.Gcpt;
         		nk++;
 			}
@@ -375,7 +375,7 @@ matrix<Complex> lattice_model_instance::projected_Green_function(Complex w, bool
 			// #pragma omp parallel for
     		for(int i=0; i<kgrid_side; i++){
 				Green_function_k M(G,{i*step,0.0,0.0});
-				set_Gcpt(M);
+				set_Gcpt_cluster(M);
 				// #pragma omp critical
 				PGF += M.Gcpt;
         		nk++;
@@ -386,7 +386,7 @@ matrix<Complex> lattice_model_instance::projected_Green_function(Complex w, bool
 				// #pragma omp parallel for
 				for(int j=0; j<kgrid_side; j++){
 					Green_function_k M(G,{i*step, j*step,0.0});
-					set_Gcpt(M);
+					set_Gcpt_cluster(M);
 					// #pragma omp critical
 					PGF += M.Gcpt;
           			nk++;
@@ -399,7 +399,7 @@ matrix<Complex> lattice_model_instance::projected_Green_function(Complex w, bool
 					// #pragma omp parallel for
 					for(int k=0; k<kgrid_side; k++){
 						Green_function_k M(G,{i*step, j*step, k*step});
-						set_Gcpt(M);
+						set_Gcpt_cluster(M);
 						// #pragma omp critical
 						PGF += M.Gcpt;
             			nk++;
@@ -437,14 +437,14 @@ matrix<Complex> lattice_model_instance::projected_Green_function(Complex w, bool
 	if(model->spatial_dimension == 0){
 		matrix<Complex> PGF(d);
 		Green_function_k M(G,{0.0,0.0,0.0});
-		set_Gcpt(M);
+		set_Gcpt_cluster(M);
 		PGF += M.Gcpt;
 		return PGF;
 	}
 
 	auto F = [this, &G] (vector3D<double> &k, const int *nv, double *I) mutable {
 		Green_function_k M(G,k);
-		set_Gcpt(M);
+		set_Gcpt_cluster(M);
 		for(size_t i=0; i<M.Gcpt.v.size(); i++){
 			I[2*i] = real(M.Gcpt.v[i]);
 			I[2*i+1] = imag(M.Gcpt.v[i]);

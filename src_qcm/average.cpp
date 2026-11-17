@@ -607,7 +607,7 @@ complex<double> lattice_model_instance::TrSigmaG(Complex w, vector3D<double> &k,
   complex<double> z(0.0);
   Green_function G = cluster_Green_function(w, false, spin_down);
   Green_function_k K(G,k);
-  set_Gcpt(K);
+  set_Gcpt_cluster(K);
   cluster_self_energy(G);
   z = G.sigma.build_matrix().trace_product(K.Gcpt);
   return z;
@@ -655,12 +655,12 @@ void lattice_model_instance::potential_energy_integrand_k(Green_function &G_up, 
   Complex w = G_up.w;
 
   Green_function_k K(G_up, k);
-  set_Gcpt(K);
+  set_Gcpt_cluster(K);
   Complex e = G_up.sigma.build_matrix().trace_product(K.Gcpt);
 
   if(G_down){
     Green_function_k K_dn(*G_down, k);
-    set_Gcpt(K_dn);
+    set_Gcpt_cluster(K_dn);
     e += G_down->sigma.build_matrix().trace_product(K_dn.Gcpt);
   }
   else if(model->mixing == HS_mixing::normal) e *= 2;

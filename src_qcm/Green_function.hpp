@@ -20,6 +20,7 @@ struct Green_function
 	block_matrix<Complex> G;
 	block_matrix<Complex> gamma; // hybridization functions
 	block_matrix<Complex> sigma; // self-energies
+	vector<Complex> sigma_K; // DCA self-energy for each cluster momentum (empty unless the instance is a DCA_instance)
 };
 
 

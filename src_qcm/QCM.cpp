@@ -18,6 +18,7 @@
   #include <omp.h>
 #endif
 
+#include "DCA.hpp"
 #include "QCM.hpp"
 #include "global_parameter.hpp"
 #include "lattice_model.hpp"
@@ -134,11 +135,22 @@ void erase_lattice_model_instance(size_t label){
   /**
    sets the model parameters to the values specified by the parameter_set No 'prm_label'
    @param label label to be given to the new instance, to identify it in memory (the library is stateful)
+   @param dca true for a dynamical cluster approximation instance (DCA_instance)
    */
-  void new_model_instance(int label)
+  void new_model_instance(int label, bool dca)
   {
     if(qcm_model->param_set == nullptr) qcm_throw("The parameters have not been specified yet.");
-    lattice_model_instances[label] = unique_ptr<lattice_model_instance>(new lattice_model_instance(qcm_model, label));
+    if(dca) lattice_model_instances[label] = make_unique<DCA_instance>(qcm_model, label);
+    else lattice_model_instances[label] = unique_ptr<lattice_model_instance>(new lattice_model_instance(qcm_model, label));
+  }
+
+
+  //! the DCA instance with that label
+  DCA_instance& DCA_instance_at(int label)
+  {
+    auto I = dynamic_cast<DCA_instance*>(lattice_model_instances.at(label).get());
+    if(I == nullptr) qcm_throw("instance "+to_string(label)+" is not a DCA instance");
+    return *I;
   }
   
 

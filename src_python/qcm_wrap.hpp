@@ -13,6 +13,7 @@
 #include "float.h"
 #include "numpy/ndarrayobject.h"
 
+#include "DCA.hpp"
 #include "QCM.hpp"
 #include "common_Py.hpp"
 #include "lattice_model.hpp"
@@ -91,7 +92,7 @@ inline void register_qcm(nb::module_ &m) {
         "lattice_hybridization"_a = nb::none(), "initiates the lattice model");
 
   m.def("new_model_instance",
-        [](int label) { QCM::new_model_instance(label); }, "label"_a = 0,
+        [](int label, int dca) { QCM::new_model_instance(label, (bool)dca); }, "label"_a = 0, "dca"_a = 0,
         "creates a new instance of the lattice model");
 
   m.def("erase_model_instance",
@@ -950,6 +951,31 @@ inline void register_qcm(nb::module_ &m) {
         },
         "clus"_a = 0, "spin_down"_a = 0, "label"_a = 0,
         "retrieves the CDMFT host function (per-cluster matrices)");
+
+  m.def("set_DCA_channels",
+        [](int sys, nb::object K, int label) {
+          vector<int> k;
+          for (nb::handle h : nb::iter(K)) k.push_back(nb::cast<int>(h));
+          QCM::DCA_instance_at(label).channels[sys] = k;
+        },
+        "sys"_a, "K"_a, "label"_a = 0,
+        "DCA: sets the cluster momenta (indices in DCA_momenta()) whose self-energy is taken from system "
+        "sys (index within the cluster) of a DCA instance");
+
+  m.def("DCA_momenta",
+        [](int label) {
+          auto& I = QCM::DCA_instance_at(label);
+          size_t n = I.K.size();
+          vector<double> K(3 * n);
+          for (size_t a = 0; a < n; a++) {
+            vector3D<double> k = I.model->physdual.to(I.model->superdual.from(I.K[a]));
+            K[3 * a] = k.x;
+            K[3 * a + 1] = k.y;
+            K[3 * a + 2] = k.z;
+          }
+          return nb_array_<double>(K.data(), {n, 3});
+        },
+        "label"_a = 0, "DCA: the cluster momenta of a DCA instance, in units of 2 pi");
 
   m.def("CDMFT_distance",
         [](nb::object val, int clus, int label) {

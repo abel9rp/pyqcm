@@ -1171,6 +1171,7 @@ class model_instance:
 
     :param lattice_model model: the (unique) lattice model
     :param int label: a unique label for the model instance. Most of the time the default is fine. Exception when two concurrent instances are needed.
+    :param bool dca: if True, a dynamical cluster approximation instance (see ``pyqcm.cdmft.DCA``)
 
     :ivar bool is_complex: True if the instance has a complex-valued state, as opposed to real
 
@@ -1180,12 +1181,13 @@ class model_instance:
     gen_props = {}
     print_dependent = False
 
-    def __init__(self, model):
+    def __init__(self, model, dca=False):
         if not isinstance(model, lattice_model): raise ValueError('The first argument of "model_instance()" should be a lattice_model object')
         self.label = model_instance.count
         model_instance.count += 1
         self.model = model
-        qcm.new_model_instance(self.label)
+        self.dca = dca
+        qcm.new_model_instance(self.label, dca)
         if not self.model.is_closed: self.model.finalize()
         self.is_complex = qcm.complex_HS(self.label)
 
@@ -1220,7 +1222,7 @@ class model_instance:
         Resets the model instance to the current parameters, with the same label
 
         """
-        qcm.new_model_instance(self.label)
+        qcm.new_model_instance(self.label, self.dca)
         self.is_complex = qcm.complex_HS(self.label)
 
     # -----------------------------------------------------------------------------------------------

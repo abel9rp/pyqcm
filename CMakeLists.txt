@@ -137,6 +137,7 @@ endif()
 # -------------
 set(QCM_SOURCES
   src_qcm/CPT.cpp
+  src_qcm/DCA.cpp
   src_qcm/Chern.cpp
   src_qcm/QCM.cpp
   src_qcm/average.cpp
