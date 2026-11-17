@@ -1298,6 +1298,17 @@ check_instance(label);
     lattice_model_instances.at(label)->set_CDMFT_host(freqs, clus, H, spin_down);
   }
 
+  void set_CDMFT_weights(int label, const vector<double>& weights)
+  {
+    #ifdef QCM_DEBUG
+    check_instance(label);
+    #endif
+    auto& I = lattice_model_instances.at(label);
+    if(weights.size() != I->CDMFT_freqs.size())
+      qcm_throw("set_CDMFT_weights: "+to_string(weights.size())+" weights for a host on "+to_string(I->CDMFT_freqs.size())+" frequencies (set the host first)");
+    I->CDMFT_weights = weights;
+  }
+
 
   vector<vector<matrix<Complex>>> get_CDMFT_host(bool spin_down, int label)
   {

@@ -936,6 +936,14 @@ inline void register_qcm(nb::module_ &m) {
         "label"_a, "freqs"_a, "H"_a, "clus"_a = 0, "spin_down"_a = 0,
         "sets the CDMFT host function from precomputed matrix data");
 
+  m.def("set_CDMFT_weights",
+        [](nb::object weights, int label) {
+          QCM::set_CDMFT_weights(label, doubles_from_Py(weights.ptr()));
+        },
+        "weights"_a, "label"_a = 0,
+        "sets the weights of the frequencies in the CDMFT distance function "
+        "(set_CDMFT_host makes them uniform)");
+
   m.def("get_CDMFT_host",
         [](int clus, int spin_down, int label) {
           auto g = QCM::get_CDMFT_host(spin_down, label);

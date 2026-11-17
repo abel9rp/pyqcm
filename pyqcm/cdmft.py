@@ -521,6 +521,8 @@ class CDMFT:
             )
         else:
             self.host_function(self.I)
+            # set_CDMFT_host() leaves uniform weights: fit with the grid's, as the built-in host does
+            qcm.set_CDMFT_weights(self.grid.cdmft_weight, self.I.label)
         # --------------------------------------------------------------------------------
 
         self.I.GS_consistency(self.check_ground_state)

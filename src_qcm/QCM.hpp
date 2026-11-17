@@ -197,6 +197,8 @@ namespace QCM{
   void CDMFT_host(const vector<double>& freqs, const vector<double>& weights, int label, double accuracy=-1.0);
   //! Sets the CDMFT host function from precomputed matrix data.
   void set_CDMFT_host(int label, const vector<double>& freqs, const int clus, const vector<matrix<Complex>>& H, const bool spin_down);
+  //! Sets the weights of the frequencies in the CDMFT distance function (after set_CDMFT_host).
+  void set_CDMFT_weights(int label, const vector<double>& weights);
   //! Computes the CDMFT distance function at the given variational point.
   double CDMFT_distance(const vector<double>& p, int clus, int label);
   //! Computes the CDMFT residual vector r(p) used by least-squares optimizers.
